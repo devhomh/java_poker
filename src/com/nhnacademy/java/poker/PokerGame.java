@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.StringTokenizer;
 
 public class PokerGame {
     private User user1;
@@ -31,54 +31,71 @@ public class PokerGame {
         
     }
 
-    public String judgement(ArrayList<Card> deck){
+    public int valueCheck(String a, String[] list){
+        if(a == "Ace") return 13;
+        return Arrays.asList(list).indexOf(a);
+    }
+
+    public String judgement(ArrayList<Card> hand){
         String result = "";
         int pairCount = 0;
         // hashmap에 <카드 넘버, 중복 횟수>를 저장
         Map<String, Integer> pairMap = new HashMap<>();
-        for (int i = 0; i <numlist.length;  i++) {
-            int tmp = i;
-            Stream<Card> tmpList = deck.stream().filter(card -> card.getNum().equals(numlist[tmp]));
-            int count = (int) tmpList.count();
-            pairMap.put(numlist[i], count);
+        for (Card card : hand) {
+            if(pairMap.containsKey(card.getNum())){
+                pairMap.computeIfPresent(card.getNum(), (k, v) -> v + 1);
+            } else{
+                pairMap.put(card.getNum(), 1);
+            }
+        }
+        int maxCount = Collections.max(pairMap.values());
+        // maxCount인 key중에서 key값이 가장 큰 것을 출력
+        Map<String, Integer> filterd = new HashMap<>();
+        for (Map.Entry<String, Integer> entry : pairMap.entrySet()) {
+            if(entry.getValue() == maxCount){
+                filterd.put(entry.getKey(), valueCheck(entry.getKey(), numlist));
+            }
+        }
+
+        String maxNum = "";
+        int maxIndex = -1;
+        for (Map.Entry<String, Integer> entry : filterd.entrySet()) {
+            if(entry.getValue() > maxIndex){
+                maxIndex = entry.getValue();
+                maxNum = entry.getKey();
+            }
         }
         // hashmap 의 value가 2인 key가 2개일 경우 , Two Pair
         for(int count : pairMap.values()){
             if(count == 2) pairCount++;
         }
-
-        if(pairCount == 2) return "Two Pair";
+        if(pairCount == 2) return maxNum + " Two Pair";
         // 중복 횟수 중 가장 큰 값을 비교하여 High, One pair, Triple, Foker를 판별
-        int maxCount = Collections.max(pairMap.values());
-        // maxCount인 key중에서 key값이 가장 큰 것을 출력
-        String[] maxCountArr = new String[numlist.length];
-        // for (Map.Entry<String, Integer> entry : pairMap.entrySet()) {
-        //     if(Objects.equals(maxCount, entry.getValue())) maxCountArr.add(entry.getKey());
-        // }
-
-        // maxCount가 같은 것 중 가장 숫자가 높은 것.
         if(maxCount == 1){
-            result = "High";
+            result = maxNum + " High";
         } else if (maxCount == 2){
-            result = "One Pair";
+            result = maxNum + " One Pair";
         } else if (maxCount == 3){
-            result = "Triple";
+            result = maxNum + " Triple";
         } else if (maxCount == 4){
-            result = "Foker";
+            result = maxNum + " Foker";
         }
         
         return result;
     }
 
-    public int valueCheck(String a){
-        return Arrays.asList(pedigree).indexOf(a);
-    }
-
     public boolean compare(String a, String b){
-        if(valueCheck(a) == valueCheck(b)){
+        StringTokenizer strA = new StringTokenizer(a);
+        StringTokenizer strB = new StringTokenizer(b);
+        String numA = strA.nextToken();
+        String pedA = strA.nextToken();
+        String numB = strB.nextToken();
+        String pedB = strB.nextToken();
+
+        if(valueCheck(pedA, pedigree) == valueCheck(pedB, pedigree)){
             // 2. 같은 족보일 경우, 족보 카드 숫자 밸류 비교 -> 숫자도 같을 경우, 카드 문양의 밸류의 값 비교
-        } else return valueCheck(a) > valueCheck(b);
-        return true;
+            return valueCheck(numA, numlist) > valueCheck(numB, numlist);
+        } else return valueCheck(pedA, pedigree) > valueCheck(pedB, pedigree);
     }
 
     public void start(){
