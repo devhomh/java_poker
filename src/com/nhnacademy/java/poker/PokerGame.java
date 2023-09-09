@@ -32,8 +32,20 @@ public class PokerGame {
     }
 
     public int valueCheck(String a, String[] list){
-        if(a == "Ace") return 13;
+        if(a.equals("Ace")) return 14;
         return Arrays.asList(list).indexOf(a);
+    }
+
+    public int patternValueCheck(ArrayList<Card> hand, String num) {
+        int val = 0;
+        for (Card card : hand) {
+            if(card.getNum() == num){
+                if(card.getPattern().getValue() > val){
+                    val = card.getPattern().getValue();
+                }
+            }
+        }
+        return val;
     }
 
     public String judgement(ArrayList<Card> hand){
@@ -69,24 +81,24 @@ public class PokerGame {
         for(int count : pairMap.values()){
             if(count == 2) pairCount++;
         }
-        if(pairCount == 2) return maxNum + " Two Pair";
+        if(pairCount == 2) return maxNum + "_Two Pair";
         // 중복 횟수 중 가장 큰 값을 비교하여 High, One pair, Triple, Foker를 판별
         if(maxCount == 1){
-            result = maxNum + " High";
+            result = maxNum + "_High";
         } else if (maxCount == 2){
-            result = maxNum + " One Pair";
+            result = maxNum + "_One Pair";
         } else if (maxCount == 3){
-            result = maxNum + " Triple";
+            result = maxNum + "_Triple";
         } else if (maxCount == 4){
-            result = maxNum + " Foker";
+            result = maxNum + "_Foker";
         }
         
         return result;
     }
 
     public boolean compare(String a, String b){
-        StringTokenizer strA = new StringTokenizer(a);
-        StringTokenizer strB = new StringTokenizer(b);
+        StringTokenizer strA = new StringTokenizer(a, "_");
+        StringTokenizer strB = new StringTokenizer(b, "_");
         String numA = strA.nextToken();
         String pedA = strA.nextToken();
         String numB = strB.nextToken();
@@ -94,7 +106,11 @@ public class PokerGame {
 
         if(valueCheck(pedA, pedigree) == valueCheck(pedB, pedigree)){
             // 2. 같은 족보일 경우, 족보 카드 숫자 밸류 비교 -> 숫자도 같을 경우, 카드 문양의 밸류의 값 비교
-            return valueCheck(numA, numlist) > valueCheck(numB, numlist);
+            if(valueCheck(numA, numlist) == valueCheck(numB, numlist)){
+                return patternValueCheck(hand1, numA) > patternValueCheck(hand2, numB);
+            } else{
+                return valueCheck(numA, numlist) > valueCheck(numB, numlist);
+            }
         } else return valueCheck(pedA, pedigree) > valueCheck(pedB, pedigree);
     }
 

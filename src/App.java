@@ -12,7 +12,6 @@ public class App {
         
         PokerGame pokerGame = new PokerGame(oppenheimer, einstein, cardSet);
         pokerGame.start();
-
     }
 }
  
